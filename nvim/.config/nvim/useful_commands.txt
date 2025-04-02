@@ -1,0 +1,7 @@
+#유용한 Neovim 명령어 모음
+
+## Tab 4칸Space로 일괄 변환
+:%s/^\(\s\+\)/\=repeat(' ', len(submatch(0))*2)/g
+
+## 현재 코드 파일 일괄 들여쓰기 적용
+gg=G
