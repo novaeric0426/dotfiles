@@ -53,20 +53,6 @@ set shiftwidth=4              " 들여쓰기 너비
 set expandtab                 " 탭을 스페이스로 변환
 set softtabstop=4             " 편집 시 탭 너비
 
-""" C 언어 특화 설정 """
-augroup c_settings
-    autocmd!
-    " .c 및 .h 파일에 대한 설정
-    autocmd FileType c,cpp setlocal commentstring=//\ %s
-    " Linux 커널 스타일 (커널 개발 시 활성화)
-    " autocmd FileType c setlocal noexpandtab tabstop=8 shiftwidth=8
-    " 자동으로 구문 검사 실행
-    autocmd FileType c setlocal makeprg=gcc\ -Wall\ -Wextra\ -std=c11\ %\ -o\ %<
-    " 태그 검색 경로
-    autocmd FileType c setlocal tags=./tags,tags;$HOME
-    " C 파일에서 헤더 파일 검색 경로
-    autocmd FileType c setlocal path+=.,/usr/include,/usr/local/include
-augroup END
 
 """ 내장 자동 완성 설정 """
 " Ctrl+n과 Ctrl+p를 통한 단어 완성
@@ -129,29 +115,8 @@ inoremap {<CR> {<CR>}<Esc>O
 " 내장 맞춤법 검사 켜기/끄기
 nnoremap <leader>s :setlocal spell!<CR>
 
-""" 유용한 자동 명령 """
-" 이전 위치 기억
-augroup remember_position
-    autocmd!
-    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-augroup END
-
-" 비활성 상태에서 상대 줄 번호 비활성화
-augroup numbertoggle
-    autocmd!
-    autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-    autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
-augroup END
-
 " make 출력에서 컴파일 에러 감지
 set errorformat=%f:%l:%c:\ %m,%f:%l:\ %m
-
-" 커서가 있는 줄 하이라이트 (삽입 모드에서는 비활성화)
-augroup cursor_highlight
-    autocmd!
-    autocmd InsertLeave * set cursorline
-    autocmd InsertEnter * set nocursorline
-augroup END
 
 """ Sessions """
 " 세션 옵션
@@ -163,14 +128,7 @@ nnoremap <leader>sr :source ~/.vim/session/
 """ 성능 최적화 """
 set lazyredraw                 " 매크로 실행 중 화면 갱신 안 함
 set ttyfast                    " 터미널 연결 속도가 빠르다고 Vim에 알림
-set updatetime=300             " 스왑 파일 쓰기 및 CursorHold 이벤트 사이의 시간(ms)
-
-""" 자동 명령 그룹을 사용하여 vimrc 재로드 시 중복 방지 """
-augroup vimrc
-    autocmd!
-    " vimrc 편집 시 자동 다시 로드
-    autocmd BufWritePost .vimrc source %
-augroup END
+set updatetime=100             " 스왑 파일 쓰기 및 CursorHold 이벤트 사이의 시간(ms)
 
 """ modeline 지원 (파일 상단/하단에 vim: 설정 허용) """
 set modeline
@@ -182,31 +140,6 @@ if filereadable("tags")
     set tagrelative
     set tags=./tags,tags;
 endif
-
-""" 상태 줄 개선 """
-" 기본 상태 줄 사용자 정의 (플러그인 없음)
-set statusline=
-set statusline+=%#DiffAdd#%{(mode()=='n')?'\ \ NORMAL\ ':''}
-set statusline+=%#DiffChange#%{(mode()=='i')?'\ \ INSERT\ ':''}
-set statusline+=%#DiffDelete#%{(mode()=='r')?'\ \ REPLACE\ ':''}
-set statusline+=%#Cursor#%{(mode()=='v')?'\ \ VISUAL\ ':''}
-set statusline+=\ %n                                " 버퍼 번호
-set statusline+=%#Visual#                           " 색상 전환
-set statusline+=%{&paste?'\ PASTE\ ':''}           " 붙여넣기 모드 표시
-set statusline+=%{&spell?'\ SPELL\ ':''}           " 맞춤법 모드 표시
-set statusline+=%#CursorIM#                         " 색상 전환
-set statusline+=%R                                  " 읽기 전용 플래그
-set statusline+=%M                                  " 수정된 플래그
-set statusline+=%#Cursor#                           " 색상 전환
-set statusline+=%#CursorLine#                       " 색상 전환
-set statusline+=\ %t\                               " 파일 이름
-set statusline+=%=                                  " 오른쪽 정렬
-set statusline+=%#CursorLine#                       " 색상 전환
-set statusline+=\ %Y\                               " 파일 유형
-set statusline+=%#CursorIM#                         " 색상 전환
-set statusline+=\ %3l:%-2c\                         " 줄 번호 : 열 번호
-set statusline+=%#Cursor#                           " 색상 전환
-set statusline+=\ %3p%%\                            " 백분율
 
 """ 커서 모양 (모드에 따라 변경) """
 if &term =~ "xterm\\|rxvt"
@@ -232,23 +165,6 @@ nnoremap <space> za
 " 비주얼 모드에서 선택한 부분 들여쓰기 유지
 vnoremap < <gv
 vnoremap > >gv
-
-""" 내장 터미널 설정 (Vim 8 이상) """
-if v:version >= 800
-    " 터미널 모드에서 일반 모드로 전환
-    tnoremap <Esc> <C-\><C-n>
-    " 터미널 모드에서 창 전환 
-    tnoremap <C-h> <C-\><C-n><C-w>h
-    tnoremap <C-j> <C-\><C-n><C-w>j
-    tnoremap <C-k> <C-\><C-n><C-w>k
-    tnoremap <C-l> <C-\><C-n><C-w>l
-    " 터미널 모드로 입력하기 위한 매핑
-    augroup terminal_settings
-        autocmd!
-        autocmd BufWinEnter,WinEnter term://* startinsert
-        autocmd BufLeave term://* stopinsert
-    augroup END
-endif
 
 """ man 페이지 내장 뷰어 """
 " K를 눌러 현재 단어의 man 페이지 열기
